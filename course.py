@@ -7,10 +7,14 @@ class Course:
     Level = Enum('Level', ['Undergraduate', 'Graduate'])
 
     def __init__(self) -> None:
-        self.title = None
+        self.name = None
         self.description = None
         self.levels = None
-        self.prereqs = []
+
+        self.subject = None
+        self.number = None
+        self.title = None
+        self.prereqs = None
 
     def __str__(self) -> str:
-        return self.title
+        return str({"Title": self.title, "Prerequisites": self.prereqs})

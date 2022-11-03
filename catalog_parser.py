@@ -2,6 +2,7 @@
 
 from html.parser import HTMLParser
 from course import Course
+from course_parser import parse_course
 
 import logging
 
@@ -78,7 +79,7 @@ class CatalogParser(HTMLParser):
         logging.trace('END <{}>'.format(tag))
 
         # Assume that there is not a table nested within the course table.
-        if tag == 'table':
+        if tag == 'table' and self.is_in_course_table:
             logging.debug("Exiting course table.")
             # Same edge case as above.
             if self.tmp_course != None:
@@ -89,10 +90,11 @@ class CatalogParser(HTMLParser):
             self.is_in_course_table = False
 
         elif tag == 'tr' and self.is_last_in_course and self.is_in_course_table:
-            logging.debug("Exiting course row.")
+            logging.debug("Exiting course row. Parsing course description.")
             # If we encountered a "Levels: " and then try to exit the course
             # row, something is wrong.
             assert not self.is_waiting_for_levels
+            parse_course(self.tmp_course)
             self.courses.append(self.tmp_course)
             self.tmp_course = None
             self.is_last_in_course = False
@@ -108,18 +110,18 @@ class CatalogParser(HTMLParser):
         # There are a lot of blank lines that we have to ignore.
         if not data:
             return
-        # The first data is the course title.
-        if self.tmp_course.title == None:
-            logging.debug("Reading course title: \"{}\"".format(data))
-            self.tmp_course.title = data
+        # The first data is the course name.
+        if self.tmp_course.name == None:
+            logging.debug("Reading course name: \"{}\"".format(data))
+            self.tmp_course.name = data
             return
         # The next is the course description.
         if self.tmp_course.description == None:
             # If we hit the levels text sooner than expected.
             if data == self.LEVELS_TEXT:
-                logging.warning("The course \"{}\" doesn't seem to have a"
+                logging.warning("The course \"{}\" doesn't seem to have a "
                                 "description. Leaving empty."
-                                .format(self.tmp_course.title))
+                                .format(self.tmp_course.name))
                 self.tmp_course.description = ""
             else:
                 logging.debug(

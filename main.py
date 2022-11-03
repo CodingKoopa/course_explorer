@@ -2,9 +2,11 @@
 
 import argparse
 import validators
-from custom_log import logging
 
+from custom_log import logging
 from catalog_parser import CatalogParser
+from course import Course
+from course_graph import CourseGraph
 
 
 def get_html(page: str) -> str:
@@ -19,10 +21,16 @@ def get_html(page: str) -> str:
     return html
 
 
-def parse_html(html: str):
+def parse_html(html: str) -> list[Course]:
     html_parser = CatalogParser()
     html_parser.feed(html)
-    print([str(course) for course in html_parser.courses])
+    logging.debug("Courses: {}".format(
+        "\n".join([str(course) for course in html_parser.courses])))
+    return html_parser.courses
+
+
+def parse_courses(courses: list[Course]) -> CourseGraph:
+    return CourseGraph(courses)
 
 
 def main():
@@ -54,7 +62,9 @@ def main():
     logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
 
     html = get_html(args.page)
-    parse_html(html)
+    courses = parse_html(html)
+    graph = parse_courses(courses)
+    logging.info(graph)
 
 
 if __name__ == "__main__":
