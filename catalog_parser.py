@@ -93,7 +93,6 @@ class CatalogParser(HTMLParser):
             # If we encountered a "Levels: " and then try to exit the course
             # row, something is wrong.
             assert not self.is_waiting_for_levels
-            self.tmp_course.initialize()
             self.courses.append(self.tmp_course)
             self.tmp_course = None
             self.is_last_in_course = False
