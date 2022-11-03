@@ -133,7 +133,8 @@ class CatalogParser(HTMLParser):
             return
         if self.is_waiting_for_levels:
             logging.debug("Reading course levels: \"{}\".".format(data))
-            self.tmp_course.add_levels(data)
+            self.tmp_course.levels = [Course.Level[level]
+                                      for level in data.split(', ')]
             self.is_waiting_for_levels = False
             return
 
